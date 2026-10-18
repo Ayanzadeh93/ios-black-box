@@ -49,15 +49,28 @@ One-time setup: add [`templates/SessionRecorder.swift`](skills/ios-black-box/tem
 To use it as an agent skill, copy `skills/ios-black-box` into `.claude/skills/` (project) or `~/.claude/skills/` (global).
 Full guide: [`SKILL.md`](skills/ios-black-box/SKILL.md).
 
+## 🧰 Skills in the box
+
+| Skill | What it does |
+|---|---|
+| [**ios-black-box**](skills/ios-black-box/SKILL.md) | Records a real iPhone session (screen + the app's own voice + your event log) and lines it all up on one timeline. |
+| [**ios-sensor-tape**](skills/ios-sensor-tape/SKILL.md) | Records the real world once (camera, LiDAR depth, motion), then replays it through your pipeline in tests, identically on every run. |
+
+```bash
+skills/ios-sensor-tape/scripts/tape.sh start 30   # walk a real scene
+skills/ios-sensor-tape/scripts/tape.sh pull       # → a tape your tests can replay
+```
+
 ## Battle-tested
 
-On its first real run, on a navigation app for blind users, it caught:
+On its first real runs, on a navigation app for blind users:
 
 - 🔇 **10 of 16** voice warnings cut off mid-sentence
 - 🔁 A phrase spoken twice: *"keyboard ahead, keyboard ahead"*
 - 🔥 The phone throttling under heat, down to **6 FPS**
+- 🎞️ A 41-second walk became a replay test: 40 real frames through the production detector, identical output on every run
 
-None of it showed up in the simulator.
+None of it was possible in the simulator alone.
 
 ## Requirements
 

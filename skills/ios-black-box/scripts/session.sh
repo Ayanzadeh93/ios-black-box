@@ -22,7 +22,7 @@ build)
 start)
   # A locked phone refuses launches; retry for ~45 s while it gets unlocked.
   for i in {1..15}; do
-    if xcrun devicectl device process launch --terminate-existing --device "$DEVICE" "$BUNDLE" \
+    if xcrun devicectl device process launch --terminate-existing --device "$DEVICE" -- "$BUNDLE" \
          -recordSession YES -recordSeconds "${2:-180}" ${=LAUNCH_ARGS:-} >/dev/null 2>&1; then
       echo "recording: accept the iOS prompt, use the app, then leave it to save"; exit 0
     fi
