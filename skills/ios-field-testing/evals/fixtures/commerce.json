@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "commerce-task",
+  "title": "Recover one checkout after losing connectivity",
+  "goal": "Recover one checkout after losing connectivity",
+  "profile": "commerce",
+  "context": {
+    "appBuild": "REPLACE",
+    "device": "REPLACE",
+    "environment": "REPLACE",
+    "thresholds": "Example only: agree task-specific limits before capture"
+  },
+  "steps": [
+    {
+      "id": "baseline",
+      "action": "Start the task and emit scenario.start",
+      "expected": "Task is available"
+    },
+    {
+      "id": "variation",
+      "action": "Apply the profile variation in a controlled setting",
+      "expected": "App reports its state and recovers"
+    },
+    {
+      "id": "complete",
+      "action": "Complete the task and emit scenario.end",
+      "expected": "The primary task outcome is recorded"
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "primary-task",
+      "description": "Recover one checkout after losing connectivity",
+      "event": "checkout.completed",
+      "metric": "count",
+      "op": "==",
+      "target": 1,
+      "minSamples": 1
+    }
+  ]
+}

@@ -1,84 +1,104 @@
 <p align="center"><img src="assets/ios-black-box.png" alt="ios-black-box: a flight recorder for your iOS app" width="100%"></p>
 
-<h1 align="center">✈️ ios-black-box</h1>
+# ios-black-box
 
-<p align="center"><b>A flight recorder for your iOS app.</b><br>
-Record real iPhone sessions (screen + the app's own voice) and get back a timeline of what it showed, said and did.</p>
+Turn a real iPhone task into inspectable evidence and a repeatable regression test.
 
-<p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT"></a>
-  <img src="https://img.shields.io/badge/iOS-17%2B-black?logo=apple" alt="iOS 17+">
-  <img src="https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white" alt="Swift 6">
-  <img src="https://img.shields.io/badge/agent%20skill-Claude%20Code%20%7C%20any%20agent-ffb020" alt="Agent skill">
-  <a href="https://github.com/Ayanzadeh93/ios-black-box/stargazers"><img src="https://img.shields.io/github/stars/Ayanzadeh93/ios-black-box?style=social" alt="Stars"></a>
-</p>
+Use these agent skills for any iOS workflow that needs a physical device: camera and ML features, AR, speech, commerce, fitness, accessibility, or indoor and outdoor navigation. Define what success means, record a short session, check the evidence, and preserve the inputs needed to reproduce a failure.
 
----
+The capture tools remain iOS-specific. They integrate into your Debug app; they do not supply an app, a detector, a backend, or automatic instrumentation for every domain.
 
-> **The simulator guesses. The phone knows.**
-> Cameras, sensors, speech timing, heat and memory only tell the truth on a real device.
+## Choose a skill
 
-## Why
-
-| | Simulator | Screenshots | **ios-black-box** |
-|---|:---:|:---:|:---:|
-| Real camera, sensors, heat | ❌ | ✅ | ✅ |
-| Video, not stills | ✅ | ❌ ~0.4 fps | ✅ |
-| Hear what the app said | ⚠️ | ❌ | ✅ app audio |
-| Events on the video's clock | ❌ | ❌ | ✅ |
-| An agent can read and judge it | ❌ | ❌ | ✅ |
-
-## What you get
-
-- 🎥 **Screen video with app audio**: ReplayKit inside your Debug build; the mic is never recorded
-- 🧾 **Your event log alongside it**: JSONL traces pulled from the app container over USB
-- 📊 **An instant report**: speech/silence spans, audio level, contact sheet
-- ⏱️ **One clock**: every log event mapped onto the video (`timeline.csv`), so a cut-off utterance lines up with the event that interrupted it
-- 🧠 **An agent playbook**: `SKILL.md` tells Claude Code (or any coding agent) how to run, read and judge a session
-
-## Quick start
-
-```bash
-export DEVICE=<udid> BUNDLE=com.you.app        # xcrun devicectl list devices
-skills/ios-black-box/scripts/session.sh build   # signed Debug build + install
-skills/ios-black-box/scripts/session.sh start 60 # use the app, then leave it
-skills/ios-black-box/scripts/session.sh pull    # → .blackbox/<timestamp>/
-```
-
-One-time setup: add [`templates/SessionRecorder.swift`](skills/ios-black-box/templates/SessionRecorder.swift) to your app and call `SessionRecorder.shared.startIfRequested()` at launch (Debug only).
-To use it as an agent skill, copy `skills/ios-black-box` into `.claude/skills/` (project) or `~/.claude/skills/` (global).
-Full guide: [`SKILL.md`](skills/ios-black-box/SKILL.md).
-
-## 🧰 Skills in the box
-
-| Skill | What it does |
+| Skill | Use it for |
 |---|---|
-| [**ios-black-box**](skills/ios-black-box/SKILL.md) | Records a real iPhone session (screen + the app's own voice + your event log) and lines it all up on one timeline. |
-| [**ios-sensor-tape**](skills/ios-sensor-tape/SKILL.md) | Records the real world once (camera, LiDAR depth, motion), then replays it through your pipeline in tests, identically on every run. |
+| [ios-field-testing](skills/ios-field-testing/SKILL.md) | Start from a user task, define measurable acceptance criteria, run a field scenario, and produce a pass/fail/inconclusive result with evidence. |
+| [ios-black-box](skills/ios-black-box/SKILL.md) | Capture the screen and app audio with ReplayKit, retrieve app traces, and inspect an approximate video timeline. |
+| [ios-sensor-tape](skills/ios-sensor-tape/SKILL.md) | Capture supplied camera frames, optional depth, motion, and app events; replay recorded inputs through your own pipeline. |
+
+## Install
+
+From your app's repository:
 
 ```bash
-skills/ios-sensor-tape/scripts/tape.sh start 30   # walk a real scene
-skills/ios-sensor-tape/scripts/tape.sh pull       # → a tape your tests can replay
+npx skills add Ayanzadeh93/ios-black-box \
+  --skill ios-field-testing ios-black-box ios-sensor-tape --agent codex
 ```
 
-## Battle-tested
+The examples below use a source checkout. After installation, resolve each script relative to its installed `SKILL.md`. You can also copy a skill folder into your agent's project skill directory, such as `.agents/skills/` for Codex or `.claude/skills/` for Claude Code. Companion skills must be installed separately when needed.
 
-On its first real runs, on a navigation app for blind users:
+## Start with a real task
 
-- 🔇 **10 of 16** voice warnings cut off mid-sentence
-- 🔁 A phrase spoken twice: *"keyboard ahead, keyboard ahead"*
-- 🔥 The phone throttling under heat, down to **6 FPS**
-- 🎞️ A 41-second walk became a replay test: 40 real frames through the production detector, identical output on every run
+For example: “When checkout loses its connection, show a recoverable state, preserve the cart, and create at most one order after retry.” The app must emit the events needed to verify those outcomes; a recording alone cannot prove a backend order count.
 
-None of it was possible in the simulator alone.
+```bash
+# Run from this repository's root. No iPhone is needed for scenario authoring.
+python3 skills/ios-field-testing/scripts/scenario.py init checkout.json --profile commerce
+# Edit the generated task, steps, and acceptance checks for your app.
+python3 skills/ios-field-testing/scripts/scenario.py validate checkout.json
+```
 
-## Requirements
+Other starting profiles are `general`, `camera-ml`, `audio`, and `fitness`. Profiles are editable test plans, not integrations with payments, location, HealthKit, networking, or speech engines.
 
-Xcode 16+ · iOS 17+ · a USB-connected iPhone · `ffmpeg` (for reports)
+## Capture on an iPhone
 
-## Contributing
+1. Add [SessionRecorder.swift](skills/ios-black-box/templates/SessionRecorder.swift) to your app target and call `SessionRecorder.shared.startIfRequested()` at launch inside `#if DEBUG`.
+2. Have the app write JSONL events to `Documents/traces/`, using `ProcessInfo.processInfo.systemUptime` in the `t` field. Include the app/build, scenario, and run identifiers in your evidence.
+3. Connect an unlocked iPhone to a Mac with Xcode, then run:
 
-Issues and PRs are welcome, especially analyzers for common trace formats and support for other agents.
-If this saves you a bug hunt, **give it a ⭐**: it helps other iOS developers find it.
+```bash
+export DEVICE='<device identifier>' BUNDLE='com.example.app'
+skills/ios-black-box/scripts/session.sh doctor
+skills/ios-black-box/scripts/session.sh build
+skills/ios-black-box/scripts/session.sh start 60
+# Accept ReplayKit's prompt, perform the scenario, and let recording stop.
+skills/ios-black-box/scripts/session.sh pull
+```
+
+Capture produces screen video, the app's audio, clock metadata, and any app traces. Optional `ffmpeg` analysis adds audio levels, silence intervals, and a contact sheet. The microphone stays disabled in the recorder template. Inspect the [capture guide](skills/ios-black-box/SKILL.md) for setup, offline analysis, and failure handling.
+
+If the task leaves the foreground and then resumes, the first screen segment stops. To capture a second segment during the same app run, add a Debug UI action that calls `SessionRecorder.shared.startNextSegment()` after the first export finishes and the app is active, then accept the fresh ReplayKit prompt. A `true` return means the request was accepted, not that recording or saving succeeded; check the resulting artifacts. Retain the continuous app trace across both segments. `session.sh start` terminates and relaunches the app, so use the in-app hook for this case. Without that integration, use the saved trace and explicitly record the missing resumed video.
+
+Evaluate a trace containing only the intended run:
+
+```bash
+python3 skills/ios-field-testing/scripts/scenario.py evaluate checkout.json \
+  path/to/run-events.jsonl --out result.json
+```
+
+Missing evidence must stay visible. A partial trace, an unexecuted step, or an unavailable measurement cannot establish that the task passed. Review the video and any backend evidence alongside the automated checks.
+
+## Preserve a regression
+
+For camera, AR, or sensor features, add the [sensor tape templates](skills/ios-sensor-tape/SKILL.md), offer frames from your existing capture pipeline, then:
+
+```bash
+export DEVICE='<device identifier>' BUNDLE='com.example.app'
+skills/ios-sensor-tape/scripts/tape.sh start 30 5
+# Perform the scenario; duration starts when the recorder starts.
+skills/ios-sensor-tape/scripts/tape.sh pull
+skills/ios-sensor-tape/scripts/tape.sh validate path/to/tape-directory
+```
+
+Replay the tape through your production adapter and assert the behavior that failed. JPEG compression, scaling, preprocessing, model versions, and pipeline state can change outputs; recorded inputs do not guarantee identical model results. For nonsensor tasks, preserve a sanitized event trace and the mocks or fixtures needed to reproduce the same transition.
+
+## Evidence and limits
+
+- ReplayKit's start callback provides an approximate uptime anchor, not the first encoded frame timestamp. Events can be placed near video moments; temporal proximity alone does not prove causality.
+- An audio level or silence interval does not identify speech or prove an utterance completed. Use completion/cancellation events and listen to the relevant segment.
+- FPS, latency, thermal state, memory, location, network conditions, and domain outcomes require app instrumentation or additional evidence. The tools do not measure them automatically.
+- Keep capture short, use test accounts, and inspect recordings and traces before sharing. Screen content and sensor data can contain personal information. See the [field workflow](skills/ios-field-testing/SKILL.md) for an evidence checklist.
+
+## Requirements and validation
+
+Physical capture: macOS, Xcode 16.3+ with Swift 6.1+, an iOS 17+ device, a signed Debug app, and USB access. ReplayKit and sensor permissions must be supported by the app/device. LiDAR depth is optional and requires compatible hardware and an enabled source. `ffmpeg` and `ffprobe` enable media reports.
+
+Scenario evaluation, timeline alignment, and structural tape checks use Python 3.9+ and run without an iPhone. The Swift templates require integration and compilation in your own Xcode project; Python checks do not establish that device capture works.
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+The project began with recordings of an accessibility navigation app. Its workflow now treats that as one field-testing use case among many. Contributions with small, reproducible scenarios and sanitized fixtures are welcome.
 
 MIT © Aydin Ayanzadeh
