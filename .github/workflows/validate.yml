@@ -1,22 +1,30 @@
 name: Validate skill tools
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: [main]
 jobs:
   portable-tools:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        python: ['3.12']
+        include:
+          - os: ubuntu-22.04
+            python: '3.9'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.9'
+          python-version: ${{ matrix.python }}
       - run: python3 -m unittest discover -s tests -v
       - run: bash -n skills/ios-black-box/scripts/session.sh skills/ios-sensor-tape/scripts/tape.sh
   swift-templates:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: xcodebuild -version
       - name: Typecheck Debug capture and replay templates against iOS
         run: |

@@ -91,7 +91,7 @@ Replay the tape through your production adapter and assert the behavior that fai
 
 ## Requirements and validation
 
-Physical capture: macOS, Xcode 16+, an iOS 17+ device, a signed Debug app, and USB access. ReplayKit and sensor permissions must be supported by the app/device. LiDAR depth is optional and requires compatible hardware and an enabled source. `ffmpeg` and `ffprobe` enable media reports.
+Physical capture: macOS, Xcode 16.3+ with Swift 6.1+, an iOS 17+ device, a signed Debug app, and USB access. ReplayKit and sensor permissions must be supported by the app/device. LiDAR depth is optional and requires compatible hardware and an enabled source. `ffmpeg` and `ffprobe` enable media reports.
 
 Scenario evaluation, timeline alignment, and structural tape checks use Python 3.9+ and run without an iPhone. The Swift templates require integration and compilation in your own Xcode project; Python checks do not establish that device capture works.
 

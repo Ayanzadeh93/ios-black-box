@@ -46,7 +46,7 @@ correctness. No unrelated skills were installed.
 ## Portable verification
 
 Python 3.9+ is sufficient for analysis and scenario tooling. Device capture needs
-macOS, Xcode 16+, a signed Debug app, and an unlocked paired physical iPhone.
+macOS, Xcode 16.3+ with Swift 6.1+, a signed Debug app, and an unlocked paired physical iPhone.
 
 ```bash
 python3 -m unittest discover -s tests -v

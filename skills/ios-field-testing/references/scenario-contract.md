@@ -73,7 +73,7 @@ Write one JSON object per line. Events require:
 - `scenario_id`: equal to the scenario's `id`.
 - Any fields needed by `where` or a numeric metric.
 
-Include exactly one `scenario.start` and one `scenario.end`, ordered by line and time. Timestamps for the selected scenario must not move backwards in the trace. Events outside the boundary lines and uptime window do not contribute to checks. Use one trace per execution; merge or split app files deliberately before evaluation so duplicate markers or unrelated runs do not become ambiguous. Rows for a different scenario ID are not counted.
+Include exactly one `scenario.start` and one `scenario.end`, ordered by line and time. Wait for scenario work to settle, emit `scenario.end`, flush the trace including that marker, then export and verify it. Timestamps for the selected scenario must not move backwards in the trace. Events outside the boundary lines and uptime window do not contribute to checks. Use one trace per execution; merge or split app files deliberately before evaluation so duplicate markers or unrelated runs do not become ambiguous. Rows for a different scenario ID are not counted.
 
 ```jsonl
 {"type":"scenario.start","t":100.0,"scenario_id":"checkout-retry"}

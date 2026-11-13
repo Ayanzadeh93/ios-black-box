@@ -46,10 +46,11 @@ customer, payment, health, or real scene data.
 
 ## CI and remaining target checks
 
-The workflow runs portable checks on Linux/macOS and typechecks the three core
-Swift templates with Swift 6 against the iOS simulator SDK. Consult the actual
-workflow run for its result; local Python tests do not establish Swift type
-correctness. `TapeReplayTests.swift` still requires replacing `YourApp` and
+The three core Swift templates passed Swift 6 typechecking against the iOS
+simulator SDK in GitHub Actions with Xcode 26.6. The workflow also runs portable
+checks on Linux/macOS with Python 3.12, plus Python 3.9 on Ubuntu 22.04; consult
+the actual workflow run for those results. Local Python tests do not establish
+Swift type correctness. `TapeReplayTests.swift` still requires replacing `YourApp` and
 connecting a real production pipeline in the consuming app.
 
 No physical iPhone was attached during this development task. App signing,
