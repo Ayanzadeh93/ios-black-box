@@ -1,0 +1,44 @@
+{
+  "skill_name": "ios-field-testing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Our checkout sometimes creates two completion events after we go offline and retry. Build a real iPhone test for exactly one completion using the supplied synthetic commerce scenario and traces. Evaluate the three traces and explain pass, fail, and missing evidence. Do not invent a device run.",
+      "expected_output": "Reproducible CLI evaluation plus evidence-backed verdicts: pass, fail, inconclusive. Missing capture markers cannot pass.",
+      "files": [
+        "fixtures/commerce.json",
+        "fixtures/commerce-pass.jsonl",
+        "fixtures/commerce-fail.jsonl",
+        "fixtures/commerce-truncated.jsonl"
+      ],
+      "assertions": [
+        "Reports exactly one pass, one fail, one inconclusive for the fixture runs",
+        "Cites event line evidence for the duplicate completion",
+        "Clearly labels fixtures synthetic and does not claim hardware capture"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I have an outdoor fitness app. Users deny motion permission, lock the phone, and then resume a workout. Extend this beyond indoor navigation: give me a task-based test with concrete observations and acceptance checks. We have no iPhone attached here.",
+      "expected_output": "Editable fitness plan with permissions, foreground/background limits, source-clock requirements, missing evidence handling, and an honest blocked physical execution result.",
+      "files": [],
+      "assertions": [
+        "Creates a fitness scenario that passes scenario.py validate",
+        "Separates screen recorder foreground limit from app background behavior",
+        "Does not claim automatic GPS, HealthKit, network capture, or a device run",
+        "Uses an explicit in-app next-segment hook after save and fresh consent; avoids relaunching a continuous workout run"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Our camera ML scanner works at my desk but misses labels outdoors after rotation. I want to capture a short real scene and replay it to compare a model change. What should the skill actually do and what can replay prove?",
+      "expected_output": "Camera-specific measurable field plan, input provenance/orientation/preprocessing controls, validate captured assets before replay, and qualified determinism claims.",
+      "files": [],
+      "assertions": [
+        "Creates a camera-ml scenario that passes scenario.py validate",
+        "Includes orientation and transformed JPEG versus live input limits",
+        "Requires artifact validation and avoids guaranteed model determinism"
+      ]
+    }
+  ]
+}

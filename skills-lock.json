@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "7bc223e2aafbdbf6e50ea243ba6ef67fe432bb069ab439fea0390795dac0bf7f"
+    },
+    "ios-black-box": {
+      "source": ".",
+      "sourceType": "local",
+      "computedHash": "8fb4246a074ccc2eff0dcd45472c232e5fa2124e9d30b9a69e63b57b686a7cde"
+    },
+    "ios-field-testing": {
+      "source": ".",
+      "sourceType": "local",
+      "computedHash": "dbb8b94764f3783178f390889d7e511da78cce08f802f934e1246e1db7bda0f5"
+    },
+    "ios-sensor-tape": {
+      "source": ".",
+      "sourceType": "local",
+      "computedHash": "856d8d6709f8589449c35ff17d2f2944e43ec0cd27ed04b493c997e7377e8189"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "computedHash": "2d7f889e6ae93c6c27d699856942c336b5b8644537496987d5571043d059b1dc"
+    }
+  }
+}

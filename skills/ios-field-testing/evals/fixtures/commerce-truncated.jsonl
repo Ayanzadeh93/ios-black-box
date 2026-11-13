@@ -1,0 +1,2 @@
+{"type": "scenario.start", "t": 100, "scenario_id": "commerce-task"}
+{"type": "checkout.completed", "t": 102, "scenario_id": "commerce-task"}

@@ -1,11 +1,12 @@
 //
 //  TapeReplayTests.swift — ios-sensor-tape skill
 //
-//  The three tests every tape deserves. Replace `run(_:)` with a call into
-//  your own pipeline (detector, classifier, depth, tracker...), returning
-//  something Equatable that describes its output for one frame.
+//  Adapt this template to your pipeline and a short, labelled fixture.
+//  makePipeline must create fresh state for EACH replay, returning a closure
+//  whose comparable outputs reflect your pipeline (vision, tracking, etc.).
 //
-//      TEST_RUNNER_SENSOR_TAPE=/path/to/tape-… xcodebuild test … \
+//      TEST_RUNNER_SENSOR_TAPE=/path/to/tape-… \
+//        TEST_RUNNER_REQUIRE_SENSOR_TAPE=1 xcodebuild test … \
 //        -only-testing:"YourAppTests/TapeReplayTests"
 //
 
@@ -18,28 +19,48 @@ struct TapeReplayTests {
     static let tapeURL: URL? = ProcessInfo.processInfo.environment["SENSOR_TAPE"]
         .map { URL(fileURLWithPath: $0, isDirectory: true) }
 
-    /// Your pipeline, one frame in, a comparable description out.
-    /// `strict` is the deliberately changed setting used by the "has teeth" test.
-    func run(_ buffer: CVPixelBuffer, strict: Bool = false) -> [String] {
-        // e.g. detector.detect(buffer, minConfidence: strict ? 0.7 : 0.3).map(\.description).sorted()
-        []
+    enum SetupError: Error { case connectYourPipeline }
+
+    /// Construct/reset the pipeline here; do not share a singleton across runs.
+    /// Match live orientation and preprocessing. Pick a deliberate setting
+    /// change and fixture that should alter output; do not assume every input
+    /// is sensitive to a confidence-threshold change.
+    func makePipeline(strict: Bool) throws -> (CVPixelBuffer) throws -> [String] {
+        // let detector = YourDetector(minConfidence: strict ? 0.7 : 0.3)
+        // return { detector.detect($0).map(\.description).sorted() }
+        throw SetupError.connectYourPipeline
     }
 
     func replay(_ tape: TapePlayer, strict: Bool = false) throws -> [[String]] {
-        try tape.frames.prefix(40).map { try run(tape.pixelBuffer(for: $0), strict: strict) }
+        let run = try makePipeline(strict: strict)
+        return try tape.frames.map { try run(tape.pixelBuffer(for: $0)) }
+    }
+
+    /// Enable this requirement in CI so a missing fixture cannot silently skip
+    /// the replay checks. The remaining tests stay optional for ordinary builds.
+    @Test func requiredFixtureIsConfigured() throws {
+        if ProcessInfo.processInfo.environment["REQUIRE_SENSOR_TAPE"] == "1" {
+            _ = try #require(Self.tapeURL, "set SENSOR_TAPE to the fixture directory")
+        }
     }
 
     @Test(.enabled(if: tapeURL != nil)) func wellFormed() throws {
         let tape = try TapePlayer(url: try #require(Self.tapeURL))
         #expect(!tape.frames.isEmpty)
-        #expect(zip(tape.samples, tape.samples.dropFirst()).allSatisfy { $0.t <= $1.t })
-        _ = try tape.image(for: try #require(tape.frames.first))
+        // Decode every asset, not just the first frame. TapePlayer already
+        // rejects malformed rows, unsafe paths and incomplete metadata.
+        for sample in tape.frames {
+            _ = try tape.image(for: sample)
+            _ = try tape.depth(for: sample)
+        }
     }
 
     @Test(.enabled(if: tapeURL != nil)) func deterministic() throws {
         let tape = try TapePlayer(url: try #require(Self.tapeURL))
         let first = try replay(tape), second = try replay(tape)
-        #expect(first.joined().count > 0, "the tape should contain something your pipeline reacts to")
+        #expect(first.joined().count > 0, "choose a labelled fixture with a known expected result")
+        // Replace exact equality with a documented numeric tolerance when the
+        // model/runtime is nondeterministic. Check labels/expected outputs too.
         #expect(first == second)
     }
 
